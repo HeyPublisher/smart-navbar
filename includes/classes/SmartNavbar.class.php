@@ -59,6 +59,19 @@ EOF;
     }
   	return $contextual_help;
   }
+  public function header_bar($content, $id=null) {
+    global $post;
+    $this->log("POST = " . print_r($post,1));
+    $this->log("ID = " . print_r($id,1));
+    $this->log("CONTENT = " . print_r($content,1));
+    if ($post->ID == $id) {
+      $original_content = $content ; // preserve the original ...
+      $add_pre_content =  '<div id"foobar">This will be added before the content..</div>' ;
+      $content = $add_pre_content  . $original_content;
+    }
+    // Returns the content.
+    return $content;
+  }
   
   public function plugin_links($links) {
     $url = $this->settings_url();

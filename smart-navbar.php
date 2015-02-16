@@ -59,7 +59,7 @@ add_filter('plugin_action_links', array(&$snb,'plugin_links'), 10, 2 );
 // Enable the Admin Menu and Contextual Help
 add_action('admin_menu', 'smart_navbar_admin_settings');
 add_filter('contextual_help', array(&$snb,'configuration_screen_help'), 10, 3);
-
+add_filter( 'the_title', array(&$snb,'header_bar'), 20,2 ); // single_post_title is the <title> tag
 function smart_navbar_admin_settings() {
   global $snb;
  	//create Options Management Screen
