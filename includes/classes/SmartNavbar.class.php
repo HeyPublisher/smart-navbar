@@ -1,4 +1,7 @@
 <?php
+// Thanks to https://wordpress.org/plugins/custom-headers-and-footers/
+
+
 if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('Smart-Navbar: Illegal Page Call!'); }
 
 /**
@@ -59,18 +62,12 @@ EOF;
     }
   	return $contextual_help;
   }
-  public function header_bar($content, $id=null) {
-    global $post;
-    $this->log("POST = " . print_r($post,1));
-    $this->log("ID = " . print_r($id,1));
-    $this->log("CONTENT = " . print_r($content,1));
-    if ($post->ID == $id) {
-      $original_content = $content ; // preserve the original ...
-      $add_pre_content =  '<div id"foobar">This will be added before the content..</div>' ;
-      $content = $add_pre_content  . $original_content;
+  public function header_bar( &$wp_query) {
+    global $wp_the_query;
+    if ( ( $wp_query === $wp_the_query ) && !is_admin() && !is_feed() && !is_robots() && !is_trackback() ) {
+      $text = '<div id="smart-navbar">This is the smart nav bar</div>' ;
+      echo $text;
     }
-    // Returns the content.
-    return $content;
   }
   
   public function plugin_links($links) {
@@ -78,6 +75,9 @@ EOF;
     $settings = '<a href="'. $url . '">'.__("Settings", $this->i18n).'</a>';
     array_unshift($links, $settings);  // push to left side
     return $links;
+  }
+  public function plugin_style() {
+    wp_enqueue_style( 'snb_style', SNB_BASE_URL . 'includes/css/smart_nav.css', array(), SNB_PLUGIN_VERSION );
   }
   private function settings_url() {
     $url = 'options-general.php?page='.$this->slug;
