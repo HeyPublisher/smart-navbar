@@ -9,8 +9,8 @@ class SmartNavbar {
 
   var $debug = true;
   var $help = false;
-  var $i18n = 'smart-navbar'; // key for internationalization stubs
-  var $opt_key = '_smart_navbar_options';  // options key
+  var $i18n = 'smart-navbar';             // key for internationalization stubs
+  var $opt_key = '_snb_plugin_options';   // options key
   var $options = array();
   var $plugin_file = 'smart-navbar/smart-navbar.php';  // this helps us with the plugin_links
   var $slug = 'smart-navbar';
@@ -72,7 +72,7 @@ EOF;
   }
   // Private functions
   private function log($msg) {
-    if (SNB_DEBUG) {
+    if ($this->debug) {
       error_log(sprintf("%s\n",$msg),3,dirname(__FILE__) . '/../../error.log');
     }
   }
