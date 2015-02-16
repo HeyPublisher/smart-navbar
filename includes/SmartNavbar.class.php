@@ -24,6 +24,7 @@ class SmartNavbar {
 
   }
   public function activate_plugin() {
+    // no logging here -it barfs on activation
     $this->log("in the activate_plugin()");
     // $this->check_plugin_version();
   }
@@ -71,7 +72,7 @@ EOF;
   }
   // Private functions
   private function log($msg) {
-    if ($this->debug) {
+    if (SNB_DEBUG) {
       error_log(sprintf("%s\n",$msg),3,dirname(__FILE__) . '/../../error.log');
     }
   }
