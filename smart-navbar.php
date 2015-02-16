@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: Smart Nav-Bar
+Plugin Name: Smart-Navbar
 Plugin URI: http://www.loudlever.com/wordpress-plugins/smart-navbar/
 Description: A navbar to help your readers better navigate your site when reading.
 Author: Loudlever
@@ -43,6 +43,8 @@ Version: 0.0.1
 //   OPTION SETTINGS
 // ---------------------------------------------------------------------------------
 // */  
+define('SNB_DEBUG',true);
+
 // 
 // define('SGW_DEBUG',false);
 // define('SGW_PLUGIN_VERSION', '2.1.1');
@@ -109,7 +111,7 @@ if ( !function_exists( 'add_action' ) ) {
 }
 
 // Load the KindleFeed class and associated scoped functionality
-load_template(dirname(__FILE__) . '/includes/SmartNavbar.class.php');
+load_template(dirname(__FILE__) . '/includes/classes/SmartNavbar.class.php');
 $snb = new SmartNavbar();
 
 // enable our link to the settings
