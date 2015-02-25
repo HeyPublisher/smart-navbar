@@ -76,8 +76,10 @@ EOF;
     array_unshift($links, $settings);  // push to left side
     return $links;
   }
-  public function plugin_style() {
+  // load custom style and js
+  public function plugin_init() {
     wp_enqueue_style( 'snb_style', SNB_BASE_URL . 'includes/css/smart_nav.css', array(), SNB_PLUGIN_VERSION );
+    wp_enqueue_script('snb_style', SNB_BASE_URL . 'includes/js/smart-nav.js', array('jquery'), SNB_PLUGIN_VERSION );
   }
   private function settings_url() {
     $url = 'options-general.php?page='.$this->slug;

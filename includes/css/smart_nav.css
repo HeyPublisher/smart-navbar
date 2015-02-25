@@ -1,6 +1,15 @@
 #smart-navbar {
-  display:block;
-  width:100%;
-  background-color:white;
+  display: block;
+  background: #ffffff;
+  height: 60px;
+  width: 100%;
+  margin-right: 0px;
+  left: 0px;
+  top:0px;
+  position: fixed;
+  z-index: 9999;  
+  text-align:center;
+  padding:5px;
   border: 1px solid silver;
+  
 }

@@ -81,8 +81,8 @@ if (class_exists("SmartNavbar")) {
   // Enable the Admin Menu and Contextual Help
   add_action('admin_menu', 'smart_navbar_admin_settings');
   add_filter('contextual_help', array(&$snb,'configuration_screen_help'), 10, 3);
-  add_filter( 'loop_start', array(&$snb,'header_bar'));
-  add_action( 'wp_enqueue_scripts', array(&$snb,'plugin_style') );
+  add_filter('loop_start', array(&$snb,'header_bar'));
+  add_action('wp_enqueue_scripts', array(&$snb,'plugin_init'));
 }
 
 register_activation_hook( __FILE__, array(&$snb,'activate_plugin'));
