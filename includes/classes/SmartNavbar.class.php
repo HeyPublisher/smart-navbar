@@ -63,9 +63,31 @@ EOF;
   	return $contextual_help;
   }
   public function header_bar( &$wp_query) {
-    global $wp_the_query;
-    if ( ( $wp_query === $wp_the_query ) && !is_admin() && !is_feed() && !is_robots() && !is_trackback() ) {
-      $text = '<div id="smart-navbar">This is the smart nav bar</div>' ;
+    global $wp_the_query,$post;
+    if ( ( $wp_query === $wp_the_query ) && !is_admin() && !is_feed() && !is_robots() && !is_trackback() && !is_home()) {
+      $this->log(sprintf("post => %s",print_r($post,1)));
+      $author = get_the_author_meta('display_name',$post->post_author);
+      $author_link = sprintf("<a href='%s'>%s</a>",get_author_posts_url($post->post_author),$author );
+      $category = get_the_category_list(',', '', $post->ID);
+      $img = SNB_BASE_URL . 'includes/images/';
+      // TODO: Get navigation into bar
+      $text = <<<EOF
+        <div id="smart-navbar">
+        <!--
+          <div id="smart-navbar-left">
+            <a href=""><img src="{$img}left.png" /></a>
+          </div>
+          <div id="smart-navbar-right">
+            <a href=""><img src="{$img}right.png" /></a>
+          </div>
+          -->
+          <div id="smart-navbar-center">
+            <h3 class='entry-title'>{$post->post_title}</h3>
+            <div class='author'>by {$author_link}</div>
+            <div class='categories-links'>posted in {$category}</div>
+          </div>
+        </div>
+EOF;
       echo $text;
     }
   }

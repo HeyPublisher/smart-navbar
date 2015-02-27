@@ -1,7 +1,7 @@
 #smart-navbar {
-  display: block;
+  display: none;
   background: #ffffff;
-  height: 60px;
+/*  height: 60px;*/
   width: 100%;
   margin-right: 0px;
   left: 0px;
@@ -9,7 +9,31 @@
   position: fixed;
   z-index: 9999;  
   text-align:center;
-  padding:5px;
-  border: 1px solid silver;
+  padding:5px 0px 10px 0px;
+  border-bottom: 1px solid silver;
+  box-shadow: 0px 2px 8px #CCCCCC;
+}
+#smart-navbar H3 {
+  font-size: 1.2em;
+  font-weight: lighter;
+  margin: 0; 
+}
+#smart-navbar .author {
+  font-weight: lighter;
+  margin: 0.1em; 
+}
+#smart-navbar .categories-links {
+/*  font-size: 0.8em;*/
+  font-weight: lighter;
+  margin: 0.1em; 
+}
+#smart-navbar-center,#smart-navbar-left,#smart-navbar-right {
+  display:inline-block;
+}  
   
+#smart-navbar-left {
+  float:left;
+}
+#smart-navbar-right {
+  float:right;
 }
