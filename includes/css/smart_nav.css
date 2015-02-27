@@ -1,7 +1,6 @@
 #smart-navbar {
   display: none;
   background: #ffffff;
-/*  height: 60px;*/
   width: 100%;
   margin-right: 0px;
   left: 0px;
@@ -23,14 +22,12 @@
   margin: 0.1em; 
 }
 #smart-navbar .categories-links {
-/*  font-size: 0.8em;*/
   font-weight: lighter;
   margin: 0.1em; 
 }
 #smart-navbar-center,#smart-navbar-left,#smart-navbar-right {
   display:inline-block;
 }  
-  
 #smart-navbar-left {
   float:left;
 }

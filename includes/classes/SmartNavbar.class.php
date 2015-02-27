@@ -70,9 +70,12 @@ EOF;
       $author_link = sprintf("<a href='%s'>%s</a>",get_author_posts_url($post->post_author),$author );
       $category = get_the_category_list(',', '', $post->ID);
       $img = SNB_BASE_URL . 'includes/images/';
+      $is_admin = '';
+      if (is_admin_bar_showing()) { $is_admin = 'class="with-admin"';}
+      
       // TODO: Get navigation into bar
       $text = <<<EOF
-        <div id="smart-navbar">
+        <div id="smart-navbar" {$is_admin}>
         <!--
           <div id="smart-navbar-left">
             <a href=""><img src="{$img}left.png" /></a>
