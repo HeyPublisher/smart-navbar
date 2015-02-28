@@ -7,12 +7,27 @@
   smartnav.above_height = null;
   smartnav.navbar = null;
 
+  // what's the initial state
+  function chooseDisplay() {
+    if ($(document).scrollTop() > smartnav.above_height) { 
+      smartnav.show(); 
+    } else { 
+      smartnav.hide(); 
+    }
+  };
+
+  // bind to scrolling
+  function bindScroll() {
+    $(window).scroll(function(){ chooseDisplay(); });
+  };
+
   smartnav.init = function() {
     smartnav.above_height = $('header').outerHeight();
-    console.log('above_height',smartnav.above_height);
     smartnav.navbar = $('#smart-navbar');
-    smartnav.navbar.hide();
+    chooseDisplay();
+    bindScroll();
   };
+  
   smartnav.hide = function() {
     if (smartnav.navbar.is(":visible")) {
       smartnav.navbar.hide();
@@ -30,8 +45,4 @@
 
 jQuery(window.smartnav).ready(function() {
   smartnav.init();
-  jQuery(window).scroll(function(){
-    if (jQuery(window).scrollTop() > smartnav.above_height) { smartnav.show(); } 
-    else { smartnav.hide(); }
-  });
 });

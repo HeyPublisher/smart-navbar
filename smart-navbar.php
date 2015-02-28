@@ -83,6 +83,10 @@ if (class_exists("SmartNavbar")) {
   add_filter('contextual_help', array(&$snb,'configuration_screen_help'), 10, 3);
   add_filter('loop_start', array(&$snb,'header_bar'));
   add_action('wp_enqueue_scripts', array(&$snb,'plugin_init'));
+  // AJAX calls for bookmarking and favoriting
+  // add_action( 'wp_ajax_my_action', 'my_action_callback' );
+  // add_action( 'wp_ajax_nopriv_my_action', 'my_action_callback' );
+  
 }
 
 register_activation_hook( __FILE__, array(&$snb,'activate_plugin'));
