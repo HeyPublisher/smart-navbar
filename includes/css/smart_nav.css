@@ -33,7 +33,12 @@
 }  
 #smart-navbar-left {
   float:left;
+  padding-left:1em;
 }
 #smart-navbar-right {
   float:right;
+  padding-right:1em;
 }
+.fa { color: gray; padding-right:0.5em; cursor:pointer;}
+.fa-arrow-circle-left:hover, .fa-arrow-circle-right:hover { color: orange; }
+.fa-heart, .fa-bookmark, .fa-share-square { color: orange; }

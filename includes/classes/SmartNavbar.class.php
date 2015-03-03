@@ -76,14 +76,16 @@ EOF;
       // TODO: Get navigation into bar
       $text = <<<EOF
         <div id="smart-navbar" {$is_admin}>
-        <!--
           <div id="smart-navbar-left">
-            <a href=""><img src="{$img}left.png" /></a>
+            <i id='snb-arrow-circle' class='fa fa-arrow-circle-left fa-lg' title='Previous'></i>
+            <i id='snb-heart' class='fa fa-heart-o fa-lg' title='Add to Favorites'></i>
+            <i id='snb-bookmark' class='fa fa-bookmark-o fa-lg' title='Add to Bookmarks'></i>
+            <i id='snb-share-square' class='fa fa-share-square-o fa-lg' title='Share with Friends'></i>
           </div>
+          
           <div id="smart-navbar-right">
-            <a href=""><img src="{$img}right.png" /></a>
+            <i class='fa fa-arrow-circle-right fa-lg' title='Next'></i>
           </div>
-          -->
           <div id="smart-navbar-center">
             <h3 class='entry-title'>{$post->post_title}</h3>
             <div class='author'>by {$author_link}</div>
@@ -103,8 +105,9 @@ EOF;
   }
   // load custom style and js
   public function plugin_init() {
-    wp_enqueue_style( 'snb_style', SNB_BASE_URL . 'includes/css/smart_nav.css', array(), SNB_PLUGIN_VERSION );
-    wp_enqueue_script('snb_style', SNB_BASE_URL . 'includes/js/smart-nav.js', array('jquery'), SNB_PLUGIN_VERSION );
+    wp_enqueue_style( 'snb_font_css', '//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css', array(), SNB_PLUGIN_VERSION );
+    wp_enqueue_style( 'snb_core_css', SNB_BASE_URL . 'includes/css/smart_nav.css', array(), SNB_PLUGIN_VERSION );
+    wp_enqueue_script('snb_core_js', SNB_BASE_URL . 'includes/js/smart-nav.js', array('jquery'), SNB_PLUGIN_VERSION );
   }
   private function settings_url() {
     $url = 'options-general.php?page='.$this->slug;

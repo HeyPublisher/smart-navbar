@@ -15,6 +15,38 @@
       smartnav.hide(); 
     }
   };
+  function handleClick(elem) {
+    
+  };
+  function bindClick(elem) {
+    var obj = $('#snb-'+elem);
+
+    var on_e = 'fa-'+elem;
+    var off_e = on_e+'-o';
+    // $(on_e).on('click',function() {
+    //   if (onoff == 'on') {
+    //     $(on_e).removeClass(on_e).addClass(off_e);
+    //   } else {
+    //     $(on_e).removeClass(off_e).addClass(on_e);
+    //   }
+    // });
+    obj.on('click',function() {
+      console.log("obj = ",obj)
+      if (obj.hasClass(off_e)) {
+        obj.removeClass(off_e).addClass(on_e);
+        console.log("saving")
+      } else if (obj.hasClass(on_e)) {
+        console.log("unsaving")
+        obj.removeClass(on_e).addClass(off_e);
+      }
+    });
+  };
+  
+  function bindIcons() {
+    $.each(['heart','bookmark','share-square'] ,function(idx,val) {
+      bindClick(val);
+    });
+  };
 
   // bind to scrolling
   function bindScroll() {
@@ -26,6 +58,7 @@
     smartnav.navbar = $('#smart-navbar');
     chooseDisplay();
     bindScroll();
+    bindIcons();
   };
   
   smartnav.hide = function() {
