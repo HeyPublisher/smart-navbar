@@ -73,6 +73,16 @@ function smart_navbar_settings_page() {
   global $snb;
   $snb->configuration_screen();
 }
+// function ajax_handler() {
+//   global $wpdb, $snb; // this is how you get access to the database
+// 
+//   echo "In the ajax handler 1";
+//   $snb->log("in ajax handler");
+//   $what = $_POST;
+//   $snb->log(sprintf("POST params = %s",print_r($what,1)));
+//   echo "In the ajax handler 2";
+//   wp_die(); // this is required to terminate immediately and return a proper response    
+// }
 
 
 if (class_exists("SmartNavbar")) {
@@ -83,10 +93,11 @@ if (class_exists("SmartNavbar")) {
   add_filter('contextual_help', array(&$snb,'configuration_screen_help'), 10, 3);
   add_filter('loop_start', array(&$snb,'header_bar'));
   add_action('wp_enqueue_scripts', array(&$snb,'plugin_init'));
-  // AJAX calls for bookmarking and favoriting
-  // add_action( 'wp_ajax_my_action', 'my_action_callback' );
-  // add_action( 'wp_ajax_nopriv_my_action', 'my_action_callback' );
-  
+  add_action('init', array(&$snb,'write_cookies'));
+  // add_action('wp_head', array(&$snb,'read_cookies'));
+  // AJAX Handlers for priviledged and non-priviledged users
+  add_action( 'wp_ajax_snb_ajax_handler', array(&$snb,'ajax_handler' ));
+  add_action( 'wp_ajax_nopriv_snb_ajax_handler', array(&$snb,'ajax_handler' ));
 }
 
 register_activation_hook( __FILE__, array(&$snb,'activate_plugin'));
