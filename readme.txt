@@ -2,7 +2,7 @@
 Contributors: loudlever
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=Y8SL68GN5J2PL
 Tags: navigation, bookmark
-Requires at least: 2.8
+Requires at least: 3.5
 Tested up to: 4.1.0
 Stable tag: 0.0.1
 License: GPLv2 or later
