@@ -19,6 +19,8 @@ class SmartNavbar {
   var $slug = 'smart-navbar';
   var $cookie_name = '_snb_user';
   var $cookie_val = null;
+  var $db_version = 1; // update only when changing db schema
+  var $db_table_name = null;
   
   public function __construct() {
 	  // initialize the dates
@@ -31,21 +33,46 @@ class SmartNavbar {
   public function activate_plugin() {
     // no logging here -it barfs on activation
     $this->log("in the activate_plugin()");
-    // $this->check_plugin_version();
+    $this->check_plugin_version();
   }
+  public function check_plugin_version() {
+    $this->log("in check_plugin_version()");
+    
+    $opts = get_option($this->opt_key);
+    // printf("<pre>In check_plugin_version()\n opts = %s</pre>",print_r($opts,1));
+    if (!$opts || !$opts[plugin] || $opts[plugin][version_last] == false) {
+      $this->log("no old version - initializing");
+      $this->init_plugin();
+      return;
+    }
+    // check for upgrade option here
+    if ($opts[plugin][version_current] != SNB_PLUGIN_VERSION) {
+      $this->log("need to upgrade version");
+      $this->upgrade_plugin($opts);
+      return;
+    }
+  }
+  
   public function deactivate_plugin() {
     $this->options = false;
     delete_option($this->opt_key);  // remove the options from db
+    $this->delete_db();
 	  return;
   }
   public function ajax_handler() {
     global $wpdb; // this is how you get access to the database
     $this->log("in ajax handler");
     $what = $_POST;
-    $this->log(sprintf("POST params = %s",print_r($what,1)));
-    echo 'OK';
-    wp_die(); // this is required to terminate immediately and return a proper response    
-    // wp_die('Error','Foo title',400); // for testing errors
+    $what['actor'] = $this->read_cookies();
+    $results = $this->update_user_data($what);
+    $this->log(sprintf("POST params = %s\n RESULTS: %s",print_r($what,1),$results));
+    if ($results) {
+      echo 'OK';
+      wp_die(); // this is required to terminate immediately and return a proper response    
+    } else {
+      echo 'Unable to save';
+      wp_die('Error','Unable to save change',400); 
+    }
   }
   public function configuration_screen() {
     if (is_user_logged_in() && is_admin() ){
@@ -137,6 +164,66 @@ EOF;
   /*
     PRIVATE FUNCTIONS
   */
+  private function delete_db() {
+    global $wpdb;
+    $table = $this->get_user_table_name();
+    $wpdb->query( "DROP TABLE IF EXISTS {$table}" ); 
+    return;
+  }
+  
+  private function get_user_table_name() {
+    global $wpdb;
+    if (!$this->db_table_name) {
+      $this->db_table_name = $wpdb->prefix . "snb_user_data";
+    }
+    return $this->db_table_name;
+  }
+  private function init_install_options() {
+    $this->options = array(
+      'plugin' => array(
+        'current_plugin_version'    => null,
+        'db_version'                => null,
+        'last_plugin_version_last'  => null,
+        'install_date'    => null,
+        'upgrade_date'    => null
+      )
+    );
+    return;
+  }
+
+  // http://codex.wordpress.org/Options_API
+  private function init_plugin() {
+    $this->init_install_options();
+    $this->init_db();
+    $this->options[plugin][version_last] = SNB_PLUGIN_VERSION;
+    $this->options[plugin][version_current] = SNB_PLUGIN_VERSION;
+    $this->options[plugin][install_date] = Date('Y-m-d');
+    $this->options[plugin][upgrade_date] = Date('Y-m-d');
+    $this->options[plugin][db_version] = $this->db_version;
+    add_option($this->opt_key,$this->options);
+    return;
+  }
+
+  // http://codex.wordpress.org/Creating_Tables_with_Plugins
+  private function init_db() {
+    global $wpdb;
+    $this->delete_db();  // covers an edge case where plugin is manually removed but table is not
+    $table = $this->get_user_table_name();
+    $charset_collate = $wpdb->get_charset_collate();
+
+    $sql = "CREATE TABLE $table (
+      id mediumint(9) NOT NULL AUTO_INCREMENT,
+      user varchar(32) NOT NULL,
+      bookmark tinyint DEFAULT 0,
+      heart tinyint DEFAULT 0,
+      created_at datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+      updated_at datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+      PRIMARY KEY (id),
+      UNIQUE KEY user (user)
+    ) $charset_collate;";
+    require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+    dbDelta( $sql );
+  }
   private function settings_url() {
     $url = 'options-general.php?page='.$this->slug;
     return $url;
@@ -146,6 +233,47 @@ EOF;
     if ($this->debug) {
       error_log(sprintf("%s\n",$msg),3,dirname(__FILE__) . '/../../error.log');
     }
+  }
+  // http://codex.wordpress.org/Creating_Tables_with_Plugins
+  private function upgrade_plugin($opts) {
+    // No updates yet.
+    // $ver = $this->get_version_as_int($this->options[plugin][version_current]);
+    // $this->log("Version = $ver");
+    // // printf("<pre>In upgrade_plugin()\n ver = %s\nopts = %s</pre>",print_r($ver,1),print_r($this->options,1));
+    // if ($ver < 210) {
+    //   $url = $this->plugin_admin_url();
+    //   // need to show the mesage about id changing 
+    //   // $html = '<div class="updated"><p>';
+    //   // $html .= __( 'You will need to update your Amazon Associate ID <a href="'.$url.'">on the Settings page</a>.', 'sgw' );
+    //   // echo $html;
+    // }
+    // $this->options[plugin][version_last] = $this->options[plugin][version_current];
+    // $this->options[plugin][version_current] = SGW_PLUGIN_VERSION;
+    // $this->options[plugin][upgrade_date] = Date('Y-m-d');
+    // update_option($this->opt_key,$this->options);
+  }
+
+  // Update the user's action in the database.
+  // http://codex.wordpress.org/Class_Reference/wpdb 
+  private function update_user_data($data) {
+    global $wpdb;
+    // $data should have 3 vals, like : actor:_snb54f64574f28af2.62829307, item:bookmark, state:off
+    if ($data['actor'] && $data['item'] && $data['state']) {
+      $table = $this->get_user_table_name();
+      $bool = $data['state'] == 'on' ? 1 : 0;
+      $time = Date('Y-m-d H:i:s');
+      $sql = $wpdb->prepare("SELECT id FROM $table WHERE user = %s",$data['actor']);
+      $this->log(sprintf("SQL = %s",print_r($sql,1)));
+      $id = $wpdb->get_var($sql);
+      $this->log(sprintf("ID = %s",print_r($id,1)));
+      if (!$id) {
+        $wpdb->insert( $table, array('user'=>$data['actor'],$data['item']=>$bool,'created_at'=>$time,'updated_at'=>$time),array( '%s', '%d', '%s', '%s' ));
+      } else {
+        $wpdb->update( $table, array($data['item']=>$bool,'updated_at'=>$time),array('id'=>$id),array('%d','%s'));
+      }
+      return true;
+    }
+    return false;
   }
   private function uuid() {
    return uniqid('_snb',true);
