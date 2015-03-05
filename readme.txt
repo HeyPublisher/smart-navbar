@@ -8,7 +8,7 @@ Stable tag: 0.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Navigation bar that persists when users scroll through long content.
+Giver your readers the ability bookmark and favorite POSTs with this slick navigation bar.
 
 == Description ==
 

@@ -21,6 +21,7 @@ class SmartNavbar {
   var $cookie_val = null;
   var $db_version = 1; // update only when changing db schema
   var $db_table_name = null;
+  var $donate_link = null;
   
   public function __construct() {
 	  // initialize the dates
@@ -86,16 +87,112 @@ class SmartNavbar {
       } elseif ($this->error) { // reload the form post in this form
         // stuff here if we have an error
       }
-      // the rest of the admin screen here...
-      print("<h2>This is where the form goes</h2>");
-    }
+?>
+      <style type='text/css'>
+        a.sgw_PayPal {
+          background-image:url(<?php echo SGW_BASE_URL; ?>images/paypal.png);
+        }
+        a.sgw_Home {
+          background-image:url(<?php echo SGW_BASE_URL; ?>images/home.png);
+        }
+        a.sgw_Suggestion {
+          background-image:url(<?php echo SGW_BASE_URL; ?>images/suggestion.png);
+        }
+        a.sgw_Contact {
+          background-image:url(<?php echo SGW_BASE_URL; ?>images/contact.png);
+        }
+        a.amznpp_More {
+          background-image:url(<?php echo SGW_BASE_URL; ?>images/more.png);
+        }
+      </style>
+      <div class="wrap">
+        <h2>Amazon Book Store Widget</h2>
+<?php
+        if (!$message) {
+?>
+          <div class="updated">
+    				<p><strong>Thanks for using this plugin! If it works for you, <a href='<?php echo $this->donate_link; ?>' target='_blank'>please donate!</a> Donations help keep this plugin free for everyone to use.</strong></p>
+          </div>
+<?php
+        }
+?>
+        <div id="poststuff" class="metabox-holder has-right-sidebar">
+          <!-- Right Side -->
+  				<div class="inner-sidebar">
+    					<div id="side-sortables" class="meta-box-sortabless ui-sortable" style="position:relative;">
+<?php 
+                  $this->html_box_header('sgw_about',__('About this Plugin','sgw'),true);
+                  // side bar elems
+                  $this->sidebar_link('PayPal',$this->donate_link,'Donate with PayPal'); 
+                  $this->sidebar_link('Home','https://wordpress.org/plugins/support-great-writers/','Plugin Homepage'); 
+                  $this->sidebar_link('Suggestion','https://wordpress.org/support/plugin/support-great-writers','Suggestions'); 
+                  $this->sidebar_link('Contact','mailto:wordpress@loudlever.com','Contact Us'); 
+                  $this->sidebar_link('More','https://wordpress.org/plugins/search.php?q=loudlever','More Plugins by Us'); 
+              	  $this->html_box_footer(true); 
+?>  
+              </div>
+            </div>
+            <!-- Left Side -->
+            <div class="has-sidebar sm-padded">
+    					<div id="post-body-content" class="has-sidebar-content">
+    						<div class="meta-box-sortabless">
+                  <form method="post" action="admin.php?page=<?php echo SNB_ADMIN_PAGE; ?>">
+                    <?php
+                      if(function_exists('wp_nonce_field')){ wp_nonce_field(SNB_ADMIN_PAGE_NONCE); }
+                    ?>   
+                    <!-- Default Settings -->
+                    <?php $this->html_box_header('sgw_default_asins',__('Settings','sgw'),true); ?>
+      						  <p>Configure Below</p>
+
+                      <p>
+                        <label class='sgw_label' for='sgw_affiliate_id'>Affiliate ID:</label>
+                        <input type="text" name="sgw_opt[affiliate_id]" id="affiliate_id" class='sgw_input' value="<?php echo  $opts['affiliate_id']; ?>" />
+                      </p>
+                      <p>
+                        <label class='sgw_label' for='country_id'>Affiliate Country:</label>
+                        <select name="sgw_opt[country_id]" id="country_id" class='sgw_input'>
+                          <?php
+                            $countries = $this->supported_countries();
+                            foreach ($countries as $key=>$val) {
+                              $sel = '';
+                              if ($opts['country_id']==$key) { $sel = 'selected="selected"'; }
+                              printf("<option value='%s' %s>%s</option>",$key,$sel,$val);
+                            }
+                          ?>          
+                        </select>
+                      </p>
+
+                      <p>
+                        <label class='sgw_label' for='sgw_default_asins'>Default ASINs:</label>
+                        <input type="text" name="sgw_opt[default]" id="sgw_default" class='sgw_input' value="<?php echo  $opts['default']; ?>" />
+                        <input type="hidden" name="save_settings" value="1" />
+                      </p>
+                    <?php $this->html_box_footer(true); ?>  
+                    <?php $this->html_box_header('sgw_post_asins',__('POST-specific ASINs','sgw'),true); ?>
+                      <p>Stuff here <code><?php echo $this->post_meta_key; ?></code>.</p>
+                  	<?php $this->html_box_footer(true); ?>  
+                    <input type="submit" class="button-primary" name="save_button" value="<?php _e('Update Settings', 'sgw'); ?>" />
+      	          </form>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
+      <?php
+
+      }
   }
 	/* Contextual Help for the Plugin Configuration Screen */
   public function configuration_screen_help($contextual_help, $screen_id, $screen) {
     if ($screen_id == $this->help) {
       $contextual_help = <<<EOF
-<h2>Smart Navbar</h2>      
-<p>Here's where we put the help.</p>
+<h2>Overview</h2>      
+<p>Stuff here
+</p>
+
+<h2>Settings</h2>
+<p>Stuff here</p>
+<p>More stuff and <code>CODE_HERE</code>.</p>
 EOF;
     }
   	return $contextual_help;
@@ -140,7 +237,21 @@ EOF;
       echo $text;
     }
   }
-  
+	public function html_box_header($id, $title) {
+    $text = <<<EOF
+  		<div id="{$id}" class="postbox">
+  			<h3 class="hndle"><span>{$title}></span></h3>
+  			<div class="inside">
+EOF;
+    echo $text;
+	}
+	public function html_box_footer() {
+    $text = <<<EOF
+				</div>
+			</div>
+EOF;
+    echo $text;
+	}
   public function plugin_links($links) {
     $url = $this->settings_url();
     $settings = '<a href="'. $url . '">'.__("Settings", $this->i18n).'</a>';
@@ -160,6 +271,10 @@ EOF;
     // $this->log("cookie = $this->cookie_val");
     return $this->cookie_val;
   }
+  public function sidebar_link($key,$link,$text) {
+    printf('<a class="sgw_button sgw_%s" href="%s" target="_blank">%s</a>',$key,$link,__($text,'sgw'));
+  }
+  
   public function write_cookies() {
     $cookie = $this->read_cookies();
     // $this->log("existing cookie in write_cookies : $cookie");

@@ -45,6 +45,8 @@ if ( !function_exists( 'add_action' ) ) {
 */  
 define('SNB_PLUGIN_VERSION', '0.0.1');
 define('SNB_BASE_URL', get_option('siteurl').'/wp-content/plugins/smart-navbar/');
+define('SNB_ADMIN_PAGE','smart-navbar');
+define('SNB_ADMIN_PAGE_NONCE','_snb-save-options');
 
 // Make sure we don't expose any info if called directly
 if ( !function_exists( 'add_action' ) ) {
