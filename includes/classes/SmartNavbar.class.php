@@ -116,14 +116,13 @@ EOF;
       $heart = $data->heart > 0 ? 'fa-heart' : 'fa-heart-o';
       $bookmark = $data->bookmark > 0 ? 'fa-bookmark' : 'fa-bookmark-o';
       
-      
       // TODO: Get navigation into bar
       $text = <<<EOF
         <div id="smart-navbar" {$is_admin}>
           <div id="smart-navbar-left">
             <!--<i id='snb-arrow-circle' class='fa fa-arrow-circle-left fa-lg' title='Previous'></i>-->
-            <i id='snb-heart' class='fa {$heart} fa-lg' title='Add to Favorites'></i>
-            <i id='snb-bookmark' class='fa {$bookmark} fa-lg' title='Add to Bookmarks'></i>
+            <i id='snb-heart' class='fa {$heart} fa-lg' title='Add to Favorites' data-id='{$post->ID}'></i>
+            <i id='snb-bookmark' class='fa {$bookmark} fa-lg' title='Add to Bookmarks' data-id='{$post->ID}'></i>
             <!--<i id='snb-share-square' class='fa fa-share-square-o fa-lg' title='Share with Friends'></i>-->
             <i id='snb-share-square' class='fa fa-question-circle fa-lg' title='What is This?'></i>
           </div>
@@ -177,11 +176,11 @@ EOF;
     return;
   }
   private function get_user_setting($actor) {
-    global $wpdb;
+    global $wpdb, $post;
     if ($actor) {
       $table = $this->get_user_table_name();
-      $sql = $wpdb->prepare("SELECT * FROM $table WHERE user = %s",$actor);
-      // $this->log(sprintf("SQL = %s",print_r($sql,1)));
+      $sql = $wpdb->prepare("SELECT * FROM $table WHERE user = %s and post_ID = %d",$actor,$post->ID);
+      $this->log(sprintf("SQL = %s",print_r($sql,1)));
       $row = $wpdb->get_row($sql);
       $this->log(sprintf("ROW = %s",print_r($row,1)));
       return $row;
@@ -232,12 +231,13 @@ EOF;
     $sql = "CREATE TABLE $table (
       id mediumint(9) NOT NULL AUTO_INCREMENT,
       user varchar(32) NOT NULL,
+      post_ID bigint(20) unsigned NOT NULL,
       bookmark tinyint DEFAULT 0,
       heart tinyint DEFAULT 0,
       created_at datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
       updated_at datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
       PRIMARY KEY (id),
-      UNIQUE KEY user (user)
+      UNIQUE KEY user_post_id (user,post_ID)
     ) $charset_collate;";
     require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
     dbDelta( $sql );
@@ -280,12 +280,16 @@ EOF;
       $table = $this->get_user_table_name();
       $bool = $data['state'] == 'on' ? 1 : 0;
       $time = Date('Y-m-d H:i:s');
-      $sql = $wpdb->prepare("SELECT id FROM $table WHERE user = %s",$data['actor']);
+      $sql = $wpdb->prepare("SELECT id FROM $table WHERE user = %s AND post_ID = %d",$data['actor'],$data['post_ID']);
       // $this->log(sprintf("SQL = %s",print_r($sql,1)));
       $id = $wpdb->get_var($sql);
       // $this->log(sprintf("ID = %s",print_r($id,1)));
       if (!$id) {
-        $wpdb->insert( $table, array('user'=>$data['actor'],$data['item']=>$bool,'created_at'=>$time,'updated_at'=>$time),array( '%s', '%d', '%s', '%s' ));
+        $wpdb->insert( 
+          $table,
+          array('user'=>$data['actor'],'post_ID'=>$data['post_ID'],$data['item']=>$bool,'created_at'=>$time,'updated_at'=>$time),
+          array( '%s', '%d', '%d', '%s', '%s' )
+        );
       } else {
         $wpdb->update( $table, array($data['item']=>$bool,'updated_at'=>$time),array('id'=>$id),array('%d','%s'));
       }
