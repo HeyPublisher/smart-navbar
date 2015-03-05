@@ -24,7 +24,7 @@
     var off_e = on_e+'-o';
     obj.on('click',function() {
       if (ajax_object.ajaxurl !== undefined) {
-        var data = { 'action': 'snb_ajax_handler', 'item': elem };
+        var data = { 'action': 'snb_ajax_handler', 'item': elem, 'post_ID': obj.data('id') };
         if (obj.hasClass(off_e)) {
           obj.removeClass(off_e).addClass(on_e);
           data.state = 'on';

@@ -121,10 +121,10 @@ EOF;
         <div id="smart-navbar" {$is_admin}>
           <div id="smart-navbar-left">
             <!--<i id='snb-arrow-circle' class='fa fa-arrow-circle-left fa-lg' title='Previous'></i>-->
+            <!--<i id='snb-bars' class='fa fa-bars fa-lg' title='Settings'></i>-->
             <i id='snb-heart' class='fa {$heart} fa-lg' title='Add to Favorites' data-id='{$post->ID}'></i>
             <i id='snb-bookmark' class='fa {$bookmark} fa-lg' title='Add to Bookmarks' data-id='{$post->ID}'></i>
             <!--<i id='snb-share-square' class='fa fa-share-square-o fa-lg' title='Share with Friends'></i>-->
-            <i id='snb-share-square' class='fa fa-question-circle fa-lg' title='What is This?'></i>
           </div>
           
           <div id="smart-navbar-right">
