@@ -64,7 +64,7 @@ class SmartNavbar {
     $this->log("in ajax handler");
     $what = $_POST;
     $what['actor'] = $this->read_cookies();
-    $results = $this->update_user_data($what);
+    $results = $this->update_user_setting($what);
     $this->log(sprintf("POST params = %s\n RESULTS: %s",print_r($what,1),$results));
     if ($results) {
       echo 'OK';
@@ -110,14 +110,20 @@ EOF;
       $img = SNB_BASE_URL . 'includes/images/';
       $is_admin = '';
       if (is_admin_bar_showing()) { $is_admin = 'class="with-admin"';}
+      $actor = $this->read_cookies();
+      $data = $this->get_user_setting($actor);
+      $this->log(sprintf("ROW DATA: %s",print_r($data,1)));
+      $heart = $data->heart > 0 ? 'fa-heart' : 'fa-heart-o';
+      $bookmark = $data->bookmark > 0 ? 'fa-bookmark' : 'fa-bookmark-o';
+      
       
       // TODO: Get navigation into bar
       $text = <<<EOF
         <div id="smart-navbar" {$is_admin}>
           <div id="smart-navbar-left">
             <!--<i id='snb-arrow-circle' class='fa fa-arrow-circle-left fa-lg' title='Previous'></i>-->
-            <i id='snb-heart' class='fa fa-heart-o fa-lg' title='Add to Favorites'></i>
-            <i id='snb-bookmark' class='fa fa-bookmark-o fa-lg' title='Add to Bookmarks'></i>
+            <i id='snb-heart' class='fa {$heart} fa-lg' title='Add to Favorites'></i>
+            <i id='snb-bookmark' class='fa {$bookmark} fa-lg' title='Add to Bookmarks'></i>
             <!--<i id='snb-share-square' class='fa fa-share-square-o fa-lg' title='Share with Friends'></i>-->
             <i id='snb-share-square' class='fa fa-question-circle fa-lg' title='What is This?'></i>
           </div>
@@ -169,6 +175,18 @@ EOF;
     $table = $this->get_user_table_name();
     $wpdb->query( "DROP TABLE IF EXISTS {$table}" ); 
     return;
+  }
+  private function get_user_setting($actor) {
+    global $wpdb;
+    if ($actor) {
+      $table = $this->get_user_table_name();
+      $sql = $wpdb->prepare("SELECT * FROM $table WHERE user = %s",$actor);
+      // $this->log(sprintf("SQL = %s",print_r($sql,1)));
+      $row = $wpdb->get_row($sql);
+      $this->log(sprintf("ROW = %s",print_r($row,1)));
+      return $row;
+    }
+    return null;
   }
   
   private function get_user_table_name() {
@@ -255,7 +273,7 @@ EOF;
 
   // Update the user's action in the database.
   // http://codex.wordpress.org/Class_Reference/wpdb 
-  private function update_user_data($data) {
+  private function update_user_setting($data) {
     global $wpdb;
     // $data should have 3 vals, like : actor:_snb54f64574f28af2.62829307, item:bookmark, state:off
     if ($data['actor'] && $data['item'] && $data['state']) {
@@ -263,9 +281,9 @@ EOF;
       $bool = $data['state'] == 'on' ? 1 : 0;
       $time = Date('Y-m-d H:i:s');
       $sql = $wpdb->prepare("SELECT id FROM $table WHERE user = %s",$data['actor']);
-      $this->log(sprintf("SQL = %s",print_r($sql,1)));
+      // $this->log(sprintf("SQL = %s",print_r($sql,1)));
       $id = $wpdb->get_var($sql);
-      $this->log(sprintf("ID = %s",print_r($id,1)));
+      // $this->log(sprintf("ID = %s",print_r($id,1)));
       if (!$id) {
         $wpdb->insert( $table, array('user'=>$data['actor'],$data['item']=>$bool,'created_at'=>$time,'updated_at'=>$time),array( '%s', '%d', '%s', '%s' ));
       } else {
