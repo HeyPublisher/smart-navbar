@@ -10,7 +10,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('Smar
 */
 class SmartNavbar {
 
-  var $debug = true;
+  var $debug = false;
   var $help = false;
   var $i18n = 'smart-navbar';             // key for internationalization stubs
   var $opt_key = '_snb_plugin_options';   // options key
