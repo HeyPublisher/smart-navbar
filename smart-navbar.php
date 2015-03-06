@@ -2,7 +2,7 @@
 /*
 Plugin Name: Smart-Navbar
 Plugin URI: http://www.loudlever.com/wordpress-plugins/smart-navbar/
-Description: A navbar to help your readers better navigate your site when reading.
+Description: Give readers the ability to favorite and bookmark POSTs with this simply styled navigation bar.
 Author: Loudlever
 Author URI: http://www.loudlever.com
 Version: 0.0.1

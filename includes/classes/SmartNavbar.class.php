@@ -164,12 +164,7 @@ class SmartNavbar {
     if ($screen_id == $this->help) {
       $contextual_help = <<<EOF
 <h2>Overview</h2>      
-<p>Stuff here
-</p>
-
-<h2>Settings</h2>
-<p>Stuff here</p>
-<p>More stuff and <code>CODE_HERE</code>.</p>
+<p>Not much to see here :)  Carry on!</p>
 EOF;
     }
   	return $contextual_help;
