@@ -58,40 +58,33 @@ if ( !function_exists( 'add_action' ) ) {
 load_template(dirname(__FILE__) . '/includes/classes/SmartNavbar.class.php');
 $snb = new SmartNavbar();
 
-function smart_navbar_admin_settings() {
-  global $snb;
- 	//create Options Management Screen
-	if (function_exists('add_options_page')) {
-	  $role = 'administrator'; // in future may want to lower to 'manage_options'
-		$snb->help = add_options_page('Smart-Navbar Settings','Smart-Navbar', $role, $snb->slug, 'smart_navbar_settings_page');
-  }
-  //   if (function_exists('add_action')) {
-  //    add_action( 'admin_init', array(&$snb,'register_options') );
-  // }
-}
+// function smart_navbar_admin_settings() {
+//   global $snb;
+//    //create Options Management Screen
+//  if (function_exists('add_options_page')) {
+//    $role = 'administrator'; // in future may want to lower to 'manage_options'
+//    $snb->help = add_options_page('Smart-Navbar Settings','Smart-Navbar', $role, $snb->slug, 'smart_navbar_settings_page');
+//     add_action("admin_print_scripts-". $snb->help, array(&$snb,'admin_js'));
+//     add_action("admin_print_styles-". $snb->help, array(&$snb,'admin_stylesheet') );
+//     
+//   }
+//   //   if (function_exists('add_action')) {
+//   //    add_action( 'admin_init', array(&$snb,'register_options') );
+//   // }
+// }
 
 // This callback does not handle class functions, thus we wrap it....
 function smart_navbar_settings_page() {
   global $snb;
   $snb->configuration_screen();
 }
-// function ajax_handler() {
-//   global $wpdb, $snb; // this is how you get access to the database
-// 
-//   echo "In the ajax handler 1";
-//   $snb->log("in ajax handler");
-//   $what = $_POST;
-//   $snb->log(sprintf("POST params = %s",print_r($what,1)));
-//   echo "In the ajax handler 2";
-//   wp_die(); // this is required to terminate immediately and return a proper response    
-// }
 
 
 if (class_exists("SmartNavbar")) {
   // enable our link to the settings
   add_filter('plugin_action_links', array(&$snb,'plugin_links'), 10, 2 );
   // Enable the Admin Menu and Contextual Help
-  add_action('admin_menu', 'smart_navbar_admin_settings');
+  add_action('admin_menu', array(&$snb,'register_admin_page')); 
   add_filter('contextual_help', array(&$snb,'configuration_screen_help'), 10, 3);
   add_filter('loop_start', array(&$snb,'header_bar'));
   add_action('wp_enqueue_scripts', array(&$snb,'plugin_init'));
@@ -100,6 +93,7 @@ if (class_exists("SmartNavbar")) {
   // AJAX Handlers for priviledged and non-priviledged users
   add_action( 'wp_ajax_snb_ajax_handler', array(&$snb,'ajax_handler' ));
   add_action( 'wp_ajax_nopriv_snb_ajax_handler', array(&$snb,'ajax_handler' ));
+  add_shortcode($snb->page_shortcode, array(&$snb,'parse_shortcode' ) );
 }
 
 register_activation_hook( __FILE__, array(&$snb,'activate_plugin'));

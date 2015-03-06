@@ -21,7 +21,10 @@ class SmartNavbar {
   var $cookie_val = null;
   var $db_version = 1; // update only when changing db schema
   var $db_table_name = null;
-  var $donate_link = null;
+  var $donate_link = 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=Y8SL68GN5J2PL';
+  var $page_shortcode = '__SMARTNAVBAR_FAVORITES_LIST_GOES_HERE__';
+  var $page_permalink = null;
+  
   
   public function __construct() {
 	  // initialize the dates
@@ -55,6 +58,7 @@ class SmartNavbar {
   }
   
   public function deactivate_plugin() {
+    $this->delete_bookmarks_page();
     $this->options = false;
     delete_option($this->opt_key);  // remove the options from db
     $this->delete_db();
@@ -78,7 +82,7 @@ class SmartNavbar {
   public function configuration_screen() {
     if (is_user_logged_in() && is_admin() ){
       // $message = $this->update_options($_POST);
-      // $opts = get_option(SGW_PLUGIN_OPTTIONS);
+      // $opts = get_option(SNB_PLUGIN_OPTTIONS);
       // $posts = $this->get_post_meta();
       // $existing = array();
       
@@ -89,20 +93,20 @@ class SmartNavbar {
       }
 ?>
       <style type='text/css'>
-        a.sgw_PayPal {
-          background-image:url(<?php echo SGW_BASE_URL; ?>images/paypal.png);
+        a.snb_PayPal {
+          background-image:url(<?php echo SNB_BASE_URL; ?>includes/images/paypal.png);
         }
-        a.sgw_Home {
-          background-image:url(<?php echo SGW_BASE_URL; ?>images/home.png);
+        a.snb_Home {
+          background-image:url(<?php echo SNB_BASE_URL; ?>includes/images/home.png);
         }
-        a.sgw_Suggestion {
-          background-image:url(<?php echo SGW_BASE_URL; ?>images/suggestion.png);
+        a.snb_Suggestion {
+          background-image:url(<?php echo SNB_BASE_URL; ?>includes/images/suggestion.png);
         }
-        a.sgw_Contact {
-          background-image:url(<?php echo SGW_BASE_URL; ?>images/contact.png);
+        a.snb_Contact {
+          background-image:url(<?php echo SNB_BASE_URL; ?>includes/images/contact.png);
         }
-        a.amznpp_More {
-          background-image:url(<?php echo SGW_BASE_URL; ?>images/more.png);
+        a.snb_More {
+          background-image:url(<?php echo SNB_BASE_URL; ?>includes/images/more.png);
         }
       </style>
       <div class="wrap">
@@ -121,11 +125,11 @@ class SmartNavbar {
   				<div class="inner-sidebar">
     					<div id="side-sortables" class="meta-box-sortabless ui-sortable" style="position:relative;">
 <?php 
-                  $this->html_box_header('sgw_about',__('About this Plugin','sgw'),true);
+                  $this->html_box_header('snb_about',__('About this Plugin',$this->i18n),true);
                   // side bar elems
                   $this->sidebar_link('PayPal',$this->donate_link,'Donate with PayPal'); 
-                  $this->sidebar_link('Home','https://wordpress.org/plugins/support-great-writers/','Plugin Homepage'); 
-                  $this->sidebar_link('Suggestion','https://wordpress.org/support/plugin/support-great-writers','Suggestions'); 
+                  $this->sidebar_link('Home','https://wordpress.org/plugins//','Plugin Homepage'); 
+                  $this->sidebar_link('Suggestion','https://wordpress.org/support/plugin/','Suggestions'); 
                   $this->sidebar_link('Contact','mailto:wordpress@loudlever.com','Contact Us'); 
                   $this->sidebar_link('More','https://wordpress.org/plugins/search.php?q=loudlever','More Plugins by Us'); 
               	  $this->html_box_footer(true); 
@@ -141,16 +145,16 @@ class SmartNavbar {
                       if(function_exists('wp_nonce_field')){ wp_nonce_field(SNB_ADMIN_PAGE_NONCE); }
                     ?>   
                     <!-- Default Settings -->
-                    <?php $this->html_box_header('sgw_default_asins',__('Settings','sgw'),true); ?>
+                    <?php $this->html_box_header('snb_default_asins',__('Settings',$this->i18n),true); ?>
       						  <p>Configure Below</p>
 
                       <p>
-                        <label class='sgw_label' for='sgw_affiliate_id'>Affiliate ID:</label>
-                        <input type="text" name="sgw_opt[affiliate_id]" id="affiliate_id" class='sgw_input' value="<?php echo  $opts['affiliate_id']; ?>" />
+                        <label class='snb_label' for='snb_affiliate_id'>Affiliate ID:</label>
+                        <input type="text" name="snb_opt[affiliate_id]" id="affiliate_id" class='snb_input' value="<?php echo  $opts['affiliate_id']; ?>" />
                       </p>
                       <p>
-                        <label class='sgw_label' for='country_id'>Affiliate Country:</label>
-                        <select name="sgw_opt[country_id]" id="country_id" class='sgw_input'>
+                        <label class='snb_label' for='country_id'>Affiliate Country:</label>
+                        <select name="snb_opt[country_id]" id="country_id" class='snb_input'>
                           <?php
                             $countries = $this->supported_countries();
                             foreach ($countries as $key=>$val) {
@@ -163,15 +167,15 @@ class SmartNavbar {
                       </p>
 
                       <p>
-                        <label class='sgw_label' for='sgw_default_asins'>Default ASINs:</label>
-                        <input type="text" name="sgw_opt[default]" id="sgw_default" class='sgw_input' value="<?php echo  $opts['default']; ?>" />
+                        <label class='snb_label' for='snb_default_asins'>Default ASINs:</label>
+                        <input type="text" name="snb_opt[default]" id="snb_default" class='snb_input' value="<?php echo  $opts['default']; ?>" />
                         <input type="hidden" name="save_settings" value="1" />
                       </p>
                     <?php $this->html_box_footer(true); ?>  
-                    <?php $this->html_box_header('sgw_post_asins',__('POST-specific ASINs','sgw'),true); ?>
+                    <?php $this->html_box_header('snb_post_asins',__('POST-specific ASINs',$this->i18n),true); ?>
                       <p>Stuff here <code><?php echo $this->post_meta_key; ?></code>.</p>
                   	<?php $this->html_box_footer(true); ?>  
-                    <input type="submit" class="button-primary" name="save_button" value="<?php _e('Update Settings', 'sgw'); ?>" />
+                    <input type="submit" class="button-primary" name="save_button" value="<?php _e('Update Settings', $this->i18n); ?>" />
       	          </form>
                 </div>
               </div>
@@ -199,8 +203,8 @@ EOF;
   }
   public function header_bar( &$wp_query) {
     global $wp_the_query,$post;
-    if ( ( $wp_query === $wp_the_query ) && !is_admin() && !is_feed() && !is_robots() && !is_trackback() && !is_home()) {
-      // $this->log(sprintf("post => %s",print_r($post,1)));
+    if ( ( $wp_query === $wp_the_query ) && !is_admin() && !is_feed() && !is_robots() && !is_trackback() && !is_home() && !is_page())  {
+      $this->log(sprintf("post => %s",print_r($post,1)));
       $author = get_the_author_meta('display_name',$post->post_author);
       $author_link = sprintf("<a href='%s'>%s</a>",get_author_posts_url($post->post_author),$author );
       $category = get_the_category_list(',', '', $post->ID);
@@ -218,7 +222,7 @@ EOF;
         <div id="smart-navbar" {$is_admin}>
           <div id="smart-navbar-left">
             <!--<i id='snb-arrow-circle' class='fa fa-arrow-circle-left fa-lg' title='Previous'></i>-->
-            <!--<i id='snb-bars' class='fa fa-bars fa-lg' title='Settings'></i>-->
+            <a href="{$this->page_permalink}"><i id='snb-bars' class='fa fa-bars fa-lg' title='Settings'></i></a>
             <i id='snb-heart' class='fa {$heart} fa-lg' title='Add to Favorites' data-id='{$post->ID}'></i>
             <i id='snb-bookmark' class='fa {$bookmark} fa-lg' title='Add to Bookmarks' data-id='{$post->ID}'></i>
             <!--<i id='snb-share-square' class='fa fa-share-square-o fa-lg' title='Share with Friends'></i>-->
@@ -240,7 +244,7 @@ EOF;
 	public function html_box_header($id, $title) {
     $text = <<<EOF
   		<div id="{$id}" class="postbox">
-  			<h3 class="hndle"><span>{$title}></span></h3>
+  			<h3 class="hndle"><span>{$title}</span></h3>
   			<div class="inside">
 EOF;
     echo $text;
@@ -252,6 +256,24 @@ EOF;
 EOF;
     echo $text;
 	}
+  // No attrs at this stage
+	public function parse_shortcode($atrs) {
+    $actor = $this->read_cookies();
+    $data = $this->get_all_user_settings($actor);
+    // need to loop over this and add stuff in hashes
+    $bookmark = array();
+    $favorites = array();
+    foreach($data as $obj) {
+      if ($obj->bookmark > 0) { $bookmark[$obj->post_title] = $obj; }
+      if ($obj->heart > 0) { $favorites[$obj->post_title] = $obj; }
+    }
+    $this->log(sprintf("BOOKS: %s\nHears = %s",print_r($bookmarks,1),print_r($favorites,1)));
+    
+    
+	  $book_html = "<h2>Bookmarks</h2>";
+	  $fav_html = "<h2>Favorites</h2>";
+	  return "This is the page youw ant!!";
+  }
   public function plugin_links($links) {
     $url = $this->settings_url();
     $settings = '<a href="'. $url . '">'.__("Settings", $this->i18n).'</a>';
@@ -271,8 +293,15 @@ EOF;
     // $this->log("cookie = $this->cookie_val");
     return $this->cookie_val;
   }
+  public function register_admin_page() {
+    // ensure our js and style sheet only get loaded on our admin page
+    $this->help = add_options_page('Smart-Navbar Settings','Smart-Navbar', 'administrator', $this->slug, array(&$this,'admin_core'));
+    add_action("admin_print_scripts-". $this->help, array(&$this,'admin_js'));
+    add_action("admin_print_styles-". $this->help, array(&$this,'admin_stylesheet') );
+  }
+  
   public function sidebar_link($key,$link,$text) {
-    printf('<a class="sgw_button sgw_%s" href="%s" target="_blank">%s</a>',$key,$link,__($text,'sgw'));
+    printf('<a class="snb_button snb_%s" href="%s" target="_blank">%s</a>',$key,$link,__($text,$this->i18n));
   }
   
   public function write_cookies() {
@@ -280,6 +309,9 @@ EOF;
     // $this->log("existing cookie in write_cookies : $cookie");
     if (!$cookie) { $cookie = $this->uuid(); }
     setcookie($this->cookie_name, $cookie, time()+(365 * 24 * 60 * 60), COOKIEPATH, COOKIE_DOMAIN, false); // 1 year cookie
+    // This can NOT be done in the constructor - and this is the soonest we can get that loaded
+    $this->log(sprintf("PLUGIN OPTS = %s\n POST ID = {$this->options[post_id]}",print_r($this->options,1)));
+    $this->page_permalink = get_permalink($this->options[post_id]);
   }
   /*
     PRIVATE FUNCTIONS
@@ -302,6 +334,25 @@ EOF;
     }
     return null;
   }
+  private function get_all_user_settings($actor) {
+    global $wpdb;
+    if ($actor) {
+      $table = $this->get_user_table_name();
+      $sql = $wpdb->prepare("
+        SELECT u.post_ID, u.bookmark,u.heart,p.post_title  
+        FROM $table u
+        INNER JOIN $wpdb->posts p
+        ON u.post_ID = p.ID
+        WHERE u.user = %s",$actor
+      );
+      $this->log(sprintf("SQL = %s",print_r($sql,1)));
+      $rows = $wpdb->get_results($sql);
+      $this->log(sprintf("ROWS = %s",print_r($rows,1)));
+      return $rows;
+    }
+    return null;
+  }
+
   
   private function get_user_table_name() {
     global $wpdb;
@@ -318,7 +369,8 @@ EOF;
         'last_plugin_version_last'  => null,
         'install_date'    => null,
         'upgrade_date'    => null
-      )
+      ),
+      'post_id' => null
     );
     return;
   }
@@ -327,11 +379,14 @@ EOF;
   private function init_plugin() {
     $this->init_install_options();
     $this->init_db();
+    $post_id = $this->create_bookmarks_page();
+    
     $this->options[plugin][version_last] = SNB_PLUGIN_VERSION;
     $this->options[plugin][version_current] = SNB_PLUGIN_VERSION;
     $this->options[plugin][install_date] = Date('Y-m-d');
     $this->options[plugin][upgrade_date] = Date('Y-m-d');
     $this->options[plugin][db_version] = $this->db_version;
+    $this->options[post_id] = $post_id; // This is the page that display's users bookmarks and favorites
     add_option($this->opt_key,$this->options);
     return;
   }
@@ -370,20 +425,6 @@ EOF;
   // http://codex.wordpress.org/Creating_Tables_with_Plugins
   private function upgrade_plugin($opts) {
     // No updates yet.
-    // $ver = $this->get_version_as_int($this->options[plugin][version_current]);
-    // $this->log("Version = $ver");
-    // // printf("<pre>In upgrade_plugin()\n ver = %s\nopts = %s</pre>",print_r($ver,1),print_r($this->options,1));
-    // if ($ver < 210) {
-    //   $url = $this->plugin_admin_url();
-    //   // need to show the mesage about id changing 
-    //   // $html = '<div class="updated"><p>';
-    //   // $html .= __( 'You will need to update your Amazon Associate ID <a href="'.$url.'">on the Settings page</a>.', 'sgw' );
-    //   // echo $html;
-    // }
-    // $this->options[plugin][version_last] = $this->options[plugin][version_current];
-    // $this->options[plugin][version_current] = SGW_PLUGIN_VERSION;
-    // $this->options[plugin][upgrade_date] = Date('Y-m-d');
-    // update_option($this->opt_key,$this->options);
   }
 
   // Update the user's action in the database.
@@ -415,6 +456,44 @@ EOF;
   private function uuid() {
    return uniqid('_snb',true);
   }
+
+  public function admin_core() {
+    $this->configuration_screen();
+  }
+  public function admin_js() {
+    // $this->log("in the admin_js()");
+    // wp_enqueue_script('sgw', WP_PLUGIN_URL . '/support-great-writers/js/sgw.js'); 
+  }
+  public function admin_stylesheet() {
+    $this->log("in the admin_stylesheet()");
+    printf("<link rel='stylesheet' href='%sincludes/css/smart_nav_admin.css' type='text/css' />",SNB_BASE_URL); 
+  }
+
+  // Create the 'PAGE' in WordPress where a user's favorites and bookmarks are displayed.
+  private function create_bookmarks_page() {
+    global $current_user;
+    $title = 'Bookmarks and Favorites';
+    $content = sprintf('[%s]',$this->page_shortcode);
+
+    // Create the page
+    $post = array (
+      "post_content"   => $content,
+      "post_title"     => $title,
+      "post_author"    => $current_user->ID,
+      "post_status"    => 'publish',
+      "post_type"      => "page"
+    );
+    $post_ID = wp_insert_post($post);
+    return $post_ID;
+  }
+  private function delete_bookmarks_page() {
+    $post_id = intval($this->options[post_id]);
+    if ($post_id > 0) {
+      wp_delete_post($post_id);
+    }
+    return;
+  }
+
 
 }
 ?>
