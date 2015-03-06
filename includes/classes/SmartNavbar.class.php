@@ -24,7 +24,7 @@ class SmartNavbar {
   var $donate_link = 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=Y8SL68GN5J2PL';
   var $page_shortcode = '__SMARTNAVBAR_FAVORITES_LIST_GOES_HERE__';
   var $page_permalink = null;
-  
+  var $page_title = 'Bookmarks and Favorites';
   
   public function __construct() {
 	  // initialize the dates
@@ -81,6 +81,8 @@ class SmartNavbar {
   }
   public function configuration_screen() {
     if (is_user_logged_in() && is_admin() ){
+      $page_link = get_permalink($this->options[post_id]);
+      
       // $message = $this->update_options($_POST);
       // $opts = get_option(SNB_PLUGIN_OPTTIONS);
       // $posts = $this->get_post_meta();
@@ -110,7 +112,7 @@ class SmartNavbar {
         }
       </style>
       <div class="wrap">
-        <h2>Amazon Book Store Widget</h2>
+        <h2>SmartNavbar Overview</h2>
 <?php
         if (!$message) {
 ?>
@@ -123,63 +125,34 @@ class SmartNavbar {
         <div id="poststuff" class="metabox-holder has-right-sidebar">
           <!-- Right Side -->
   				<div class="inner-sidebar">
-    					<div id="side-sortables" class="meta-box-sortabless ui-sortable" style="position:relative;">
+  					<div id="side-sortables" class="meta-box-sortabless ui-sortable" style="position:relative;">
 <?php 
-                  $this->html_box_header('snb_about',__('About this Plugin',$this->i18n),true);
-                  // side bar elems
-                  $this->sidebar_link('PayPal',$this->donate_link,'Donate with PayPal'); 
-                  $this->sidebar_link('Home','https://wordpress.org/plugins//','Plugin Homepage'); 
-                  $this->sidebar_link('Suggestion','https://wordpress.org/support/plugin/','Suggestions'); 
-                  $this->sidebar_link('Contact','mailto:wordpress@loudlever.com','Contact Us'); 
-                  $this->sidebar_link('More','https://wordpress.org/plugins/search.php?q=loudlever','More Plugins by Us'); 
-              	  $this->html_box_footer(true); 
+                $this->html_box_header('snb_about',__('About this Plugin',$this->i18n),true);
+                // side bar elems
+                $this->sidebar_link('PayPal',$this->donate_link,'Donate with PayPal'); 
+                $this->sidebar_link('Home','https://wordpress.org/plugins//','Plugin Homepage'); 
+                $this->sidebar_link('Suggestion','https://wordpress.org/support/plugin/','Suggestions'); 
+                $this->sidebar_link('Contact','mailto:wordpress@loudlever.com','Contact Us'); 
+                $this->sidebar_link('More','https://wordpress.org/plugins/search.php?q=loudlever','More Plugins by Us'); 
+            	  $this->html_box_footer(true); 
 ?>  
+            </div>
+          </div>
+          <!-- Left Side -->
+          <div class="has-sidebar sm-padded">
+  					<div id="post-body-content" class="has-sidebar-content">
+  						<div class="meta-box-sortabless">
+                <?php
+                  if(function_exists('wp_nonce_field')){ wp_nonce_field(SNB_ADMIN_PAGE_NONCE); }
+                ?>   
+                <!-- Default Settings -->
+                <?php $this->html_box_header('snb_default_asins',__('Overview',$this->i18n),true); ?>
+  						  <p>Readers will be able to view their Bookmarks and Favorites on the page: <a href='<?php echo $page_link; ?>'><?php echo $this->page_title; ?></a></p>
+  						  <p>Feel free the <?php echo edit_post_link('modify the page','','',$this->options[post_id]); ?> if you wish.  Just remember to keep the following shortcode in the page:</p>
+  						  <p><code>[<?php echo $this->page_shortcode; ?>]</code>.</p>
               </div>
             </div>
-            <!-- Left Side -->
-            <div class="has-sidebar sm-padded">
-    					<div id="post-body-content" class="has-sidebar-content">
-    						<div class="meta-box-sortabless">
-                  <form method="post" action="admin.php?page=<?php echo SNB_ADMIN_PAGE; ?>">
-                    <?php
-                      if(function_exists('wp_nonce_field')){ wp_nonce_field(SNB_ADMIN_PAGE_NONCE); }
-                    ?>   
-                    <!-- Default Settings -->
-                    <?php $this->html_box_header('snb_default_asins',__('Settings',$this->i18n),true); ?>
-      						  <p>Configure Below</p>
-
-                      <p>
-                        <label class='snb_label' for='snb_affiliate_id'>Affiliate ID:</label>
-                        <input type="text" name="snb_opt[affiliate_id]" id="affiliate_id" class='snb_input' value="<?php echo  $opts['affiliate_id']; ?>" />
-                      </p>
-                      <p>
-                        <label class='snb_label' for='country_id'>Affiliate Country:</label>
-                        <select name="snb_opt[country_id]" id="country_id" class='snb_input'>
-                          <?php
-                            $countries = $this->supported_countries();
-                            foreach ($countries as $key=>$val) {
-                              $sel = '';
-                              if ($opts['country_id']==$key) { $sel = 'selected="selected"'; }
-                              printf("<option value='%s' %s>%s</option>",$key,$sel,$val);
-                            }
-                          ?>          
-                        </select>
-                      </p>
-
-                      <p>
-                        <label class='snb_label' for='snb_default_asins'>Default ASINs:</label>
-                        <input type="text" name="snb_opt[default]" id="snb_default" class='snb_input' value="<?php echo  $opts['default']; ?>" />
-                        <input type="hidden" name="save_settings" value="1" />
-                      </p>
-                    <?php $this->html_box_footer(true); ?>  
-                    <?php $this->html_box_header('snb_post_asins',__('POST-specific ASINs',$this->i18n),true); ?>
-                      <p>Stuff here <code><?php echo $this->post_meta_key; ?></code>.</p>
-                  	<?php $this->html_box_footer(true); ?>  
-                    <input type="submit" class="button-primary" name="save_button" value="<?php _e('Update Settings', $this->i18n); ?>" />
-      	          </form>
-                </div>
-              </div>
-            </div>
+          </div>
         </div>
       </div>
       <?php
@@ -261,19 +234,33 @@ EOF;
     $actor = $this->read_cookies();
     $data = $this->get_all_user_settings($actor);
     // need to loop over this and add stuff in hashes
-    $bookmark = array();
+    $bookmarks = array();
     $favorites = array();
     foreach($data as $obj) {
-      if ($obj->bookmark > 0) { $bookmark[$obj->post_title] = $obj; }
+      if ($obj->bookmark > 0) { $bookmarks[$obj->post_title] = $obj; }
       if ($obj->heart > 0) { $favorites[$obj->post_title] = $obj; }
     }
-    $this->log(sprintf("BOOKS: %s\nHears = %s",print_r($bookmarks,1),print_r($favorites,1)));
-    
-    
-	  $book_html = "<h2>Bookmarks</h2>";
-	  $fav_html = "<h2>Favorites</h2>";
-	  return "This is the page youw ant!!";
+    if($bookmarks) { ksort($bookmarks); }
+    if($favorites) { ksort($favorites); }
+    $html = '<p>Below is everything you have bookmarked or favorited so far.</p>';
+    $html .= $this->link_to_post('Bookmarks',$bookmarks);
+    $html .= $this->link_to_post('Favorites',$favorites);
+	  return $html;
   }
+  private function link_to_post($title,$hash) {
+	  $html = "<h3>{$title}</h3>";
+	  if ($hash) {
+      $html .= '<ul>';
+	    foreach($hash as $title=>$obj) {
+	      $html .= sprintf("<li><a href='%s'>%s</a></li>",get_permalink($obj->post_ID),$title);
+        }
+      $html .= '</ul>';
+    } else { 
+      $html .= "<p>No {$title} yet.</p>";  
+    }
+    return $html;
+  }
+  
   public function plugin_links($links) {
     $url = $this->settings_url();
     $settings = '<a href="'. $url . '">'.__("Settings", $this->i18n).'</a>';
@@ -472,13 +459,12 @@ EOF;
   // Create the 'PAGE' in WordPress where a user's favorites and bookmarks are displayed.
   private function create_bookmarks_page() {
     global $current_user;
-    $title = 'Bookmarks and Favorites';
     $content = sprintf('[%s]',$this->page_shortcode);
 
     // Create the page
     $post = array (
       "post_content"   => $content,
-      "post_title"     => $title,
+      "post_title"     => $this->page_title,
       "post_author"    => $current_user->ID,
       "post_status"    => 'publish',
       "post_type"      => "page"
