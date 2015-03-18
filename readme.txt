@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: navigation, bookmark, favorite
 Requires at least: 3.5
 Tested up to: 4.1.0
-Stable tag: 0.0.1
+Stable tag: 0.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,12 +33,10 @@ This plugin give you a simple way to allow your readers to bookmark or favorite 
 1. Simple bar automatically displays at the top of page on all POSTs as readers scroll down the page.  When displayed, readers can favorite or bookmark the POSTs by simply clicking on the icon.
 2. The page readers will see when they click on settings icon, allowing them to see all of the POSTs they have favorited or bookmarked.
 
-== Upgrade Notice ==
-
-= 0.0.1 =
-* Initial release
-
 == Changelog ==
+
+= 0.0.2 =
+* Fixed bug with Settings link registration
 
 = 0.0.1 =
 * Plugin release.

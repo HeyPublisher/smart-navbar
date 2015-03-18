@@ -15,7 +15,7 @@ class SmartNavbar {
   var $i18n = 'smart-navbar';             // key for internationalization stubs
   var $opt_key = '_snb_plugin_options';   // options key
   var $options = array();
-  var $plugin_file = 'smart-navbar/smart-navbar.php';  // this helps us with the plugin_links
+  var $plugin_file = 'smart-navbar/smart-navbar.php';  // this helps us with the plugin_link
   var $slug = 'smart-navbar';
   var $cookie_name = '_snb_user';
   var $cookie_val = null;
@@ -255,8 +255,10 @@ EOF;
     }
     return $html;
   }
-  
-  public function plugin_links($links) {
+  public function plugin_filter() {
+    return sprintf('plugin_action_links_%s',SNB_PLUGIN_FILE); 
+  }
+  public function plugin_link($links) {
     $url = $this->settings_url();
     $settings = '<a href="'. $url . '">'.__("Settings", $this->i18n).'</a>';
     array_unshift($links, $settings);  // push to left side

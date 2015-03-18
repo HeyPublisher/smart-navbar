@@ -5,7 +5,7 @@ Plugin URI: http://www.loudlever.com/wordpress-plugins/smart-navbar/
 Description: Give readers the ability to favorite and bookmark POSTs with this simply styled navigation bar.
 Author: Loudlever
 Author URI: http://www.loudlever.com
-Version: 0.0.1
+Version: 0.0.2
 
   Copyright 2014-2015 Loudlever (wordpress@loudlever.com)
 
@@ -47,6 +47,7 @@ define('SNB_PLUGIN_VERSION', '0.0.1');
 define('SNB_BASE_URL', get_option('siteurl').'/wp-content/plugins/smart-navbar/');
 define('SNB_ADMIN_PAGE','smart-navbar');
 define('SNB_ADMIN_PAGE_NONCE','_snb-save-options');
+define('SNB_PLUGIN_FILE',plugin_basename(__FILE__));
 
 // Make sure we don't expose any info if called directly
 if ( !function_exists( 'add_action' ) ) {
@@ -58,31 +59,15 @@ if ( !function_exists( 'add_action' ) ) {
 load_template(dirname(__FILE__) . '/includes/classes/SmartNavbar.class.php');
 $snb = new SmartNavbar();
 
-// function smart_navbar_admin_settings() {
-//   global $snb;
-//    //create Options Management Screen
-//  if (function_exists('add_options_page')) {
-//    $role = 'administrator'; // in future may want to lower to 'manage_options'
-//    $snb->help = add_options_page('Smart-Navbar Settings','Smart-Navbar', $role, $snb->slug, 'smart_navbar_settings_page');
-//     add_action("admin_print_scripts-". $snb->help, array(&$snb,'admin_js'));
-//     add_action("admin_print_styles-". $snb->help, array(&$snb,'admin_stylesheet') );
-//     
-//   }
-//   //   if (function_exists('add_action')) {
-//   //    add_action( 'admin_init', array(&$snb,'register_options') );
-//   // }
-// }
-
 // This callback does not handle class functions, thus we wrap it....
 function smart_navbar_settings_page() {
   global $snb;
   $snb->configuration_screen();
 }
 
-
 if (class_exists("SmartNavbar")) {
   // enable our link to the settings
-  add_filter('plugin_action_links', array(&$snb,'plugin_links'), 10, 2 );
+  add_filter($snb->plugin_filter(), array(&$snb,'plugin_link'), 10, 2 );
   // Enable the Admin Menu and Contextual Help
   add_action('admin_menu', array(&$snb,'register_admin_page')); 
   add_filter('contextual_help', array(&$snb,'configuration_screen_help'), 10, 3);
