@@ -96,19 +96,19 @@ class SmartNavbar {
 ?>
       <style type='text/css'>
         a.snb_PayPal {
-          background-image:url(<?php echo SNB_BASE_URL; ?>includes/images/paypal.png);
+          background-image:url(<?php echo SNB_INCLUDE_URL; ?>/images/paypal.png);
         }
         a.snb_Home {
-          background-image:url(<?php echo SNB_BASE_URL; ?>includes/images/home.png);
+          background-image:url(<?php echo SNB_INCLUDE_URL; ?>/images/home.png);
         }
         a.snb_Suggestion {
-          background-image:url(<?php echo SNB_BASE_URL; ?>includes/images/suggestion.png);
+          background-image:url(<?php echo SNB_INCLUDE_URL; ?>/images/suggestion.png);
         }
         a.snb_Contact {
-          background-image:url(<?php echo SNB_BASE_URL; ?>includes/images/contact.png);
+          background-image:url(<?php echo SNB_INCLUDE_URL; ?>/images/contact.png);
         }
         a.snb_More {
-          background-image:url(<?php echo SNB_BASE_URL; ?>includes/images/more.png);
+          background-image:url(<?php echo SNB_INCLUDE_URL; ?>/images/more.png);
         }
       </style>
       <div class="wrap">
@@ -176,7 +176,7 @@ EOF;
       $author = get_the_author_meta('display_name',$post->post_author);
       $author_link = sprintf("<a href='%s'>%s</a>",get_author_posts_url($post->post_author),$author );
       $category = get_the_category_list(',', '', $post->ID);
-      $img = SNB_BASE_URL . 'includes/images/';
+      $img = SNB_INCLUDE_URL . '/images/';
       $is_admin = '';
       if (is_admin_bar_showing()) { $is_admin = 'class="with-admin"';}
       $actor = $this->read_cookies();
@@ -267,8 +267,8 @@ EOF;
   // load custom style and js
   public function plugin_init() {
     wp_enqueue_style( 'snb_font_css', '//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css', array(), SNB_PLUGIN_VERSION );
-    wp_enqueue_style( 'snb_core_css', SNB_BASE_URL . 'includes/css/smart_nav.css', array(), SNB_PLUGIN_VERSION );
-    wp_enqueue_script('snb_core_js', SNB_BASE_URL . 'includes/js/smart-nav.js', array('jquery'), SNB_PLUGIN_VERSION );
+    wp_enqueue_style( 'snb_core_css', SNB_INCLUDE_URL . '/css/smart_nav.css', array(), SNB_PLUGIN_VERSION );
+    wp_enqueue_script('snb_core_js', SNB_INCLUDE_URL . '/js/smart-nav.js', array('jquery'), SNB_PLUGIN_VERSION );
     wp_localize_script('snb_core_js', 'ajax_object',array( 'ajaxurl' => admin_url( 'admin-ajax.php' )));
   }
   public function read_cookies() {
@@ -450,7 +450,7 @@ EOF;
   }
   public function admin_stylesheet() {
     $this->log("in the admin_stylesheet()");
-    printf("<link rel='stylesheet' href='%sincludes/css/smart_nav_admin.css' type='text/css' />",SNB_BASE_URL); 
+    printf("<link rel='stylesheet' href='%s/css/smart_nav_admin.css' type='text/css' />",SNB_INCLUDE_URL); 
   }
 
   // Create the 'PAGE' in WordPress where a user's favorites and bookmarks are displayed.
