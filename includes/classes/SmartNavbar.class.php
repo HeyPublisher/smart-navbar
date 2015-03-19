@@ -43,7 +43,6 @@ class SmartNavbar {
     $this->log("in check_plugin_version()");
     
     $opts = get_option($this->opt_key);
-    // printf("<pre>In check_plugin_version()\n opts = %s</pre>",print_r($opts,1));
     if (!$opts || !$opts[plugin] || $opts[plugin][version_last] == false) {
       $this->log("no old version - initializing");
       $this->init_plugin();
@@ -421,9 +420,7 @@ EOF;
       $bool = $data['state'] == 'on' ? 1 : 0;
       $time = Date('Y-m-d H:i:s');
       $sql = $wpdb->prepare("SELECT id FROM $table WHERE user = %s AND post_ID = %d",$data['actor'],$data['post_ID']);
-      // $this->log(sprintf("SQL = %s",print_r($sql,1)));
       $id = $wpdb->get_var($sql);
-      // $this->log(sprintf("ID = %s",print_r($id,1)));
       if (!$id) {
         $wpdb->insert( 
           $table,
@@ -450,7 +447,7 @@ EOF;
   }
   public function admin_stylesheet() {
     $this->log("in the admin_stylesheet()");
-    printf("<link rel='stylesheet' href='%s/css/smart_nav_admin.css' type='text/css' />",SNB_INCLUDE_URL); 
+    wp_enqueue_style( 'snb_admin_css', SNB_INCLUDE_URL . '/css/smart_nav_admin.css', array(), SNB_PLUGIN_VERSION );
   }
 
   // Create the 'PAGE' in WordPress where a user's favorites and bookmarks are displayed.

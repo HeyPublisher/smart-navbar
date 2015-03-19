@@ -1,5 +1,8 @@
 ###Changelog
 
+#### 0.0.4
+* Fixed bug with enqueing of admin stylesheet
+
 #### 0.0.3 
 * Fixed bug with plugins_url() call
 
