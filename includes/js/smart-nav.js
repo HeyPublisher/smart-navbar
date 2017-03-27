@@ -9,14 +9,14 @@
 
   // what's the initial state
   function chooseDisplay() {
-    if ($(document).scrollTop() > smartnav.above_height) { 
+    if ($(document).scrollTop() > smartnav.above_height) {
       smartnav.show(); 
-    } else { 
-      smartnav.hide(); 
+    } else {
+      smartnav.hide();
     }
   };
   function handleClick(elem) {
-    
+
   };
   function bindClick(elem) {
     var obj = $('#snb-'+elem);
@@ -34,7 +34,7 @@
         }
         if (data.state !== undefined) {
           $.post(ajax_object.ajaxurl, data, function(response) {
-            if (response != 'OK') { 
+            if (response != 'OK') {
               // roll the buttons back
               if (data.state == 'on') { obj.removeClass(on_e).addClass(off_e); }
               else {obj.removeClass(off_e).addClass(on_e);}
@@ -45,7 +45,7 @@
       }
     });
   };
-  
+
   function bindIcons() {
     $.each(['heart','bookmark','share-square'] ,function(idx,val) {
       bindClick(val);
@@ -64,7 +64,7 @@
     bindScroll();
     bindIcons();
   };
-  
+
   smartnav.hide = function() {
     if (smartnav.navbar.is(":visible")) {
       smartnav.navbar.hide();
