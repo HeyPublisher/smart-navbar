@@ -25,17 +25,19 @@ class SmartNavbar {
   var $page_shortcode = '__SMARTNAVBAR_FAVORITES_LIST_GOES_HERE__';
   var $page_permalink = null;
   var $page_title = 'Bookmarks and Favorites';
-  var $defaults = array('on_page' => true,'on_home' => false);
-  
+  var $defaults = array();
+
   public function __construct() {
 	  // initialize the dates
+    $this->defaults = $this->get_defaults();
 	  $this->options = get_option($this->opt_key);
 	  $this->check_plugin_version();
-  }   
+  }
 
   public function __destruct() {
 
   }
+
   public function activate_plugin() {
     // no logging here -it barfs on activation
     $this->log("in the activate_plugin()");
@@ -43,7 +45,7 @@ class SmartNavbar {
   }
   public function check_plugin_version() {
     $this->log("in check_plugin_version()");
-    
+
     $opts = get_option($this->opt_key);
     if (!$opts || !$opts[plugin] || $opts[plugin][version_last] == false) {
       $this->log("no old version - initializing");
@@ -57,7 +59,7 @@ class SmartNavbar {
       return;
     }
   }
-  
+
   public function deactivate_plugin() {
     $this->delete_bookmarks_page();
     $this->options = false;
@@ -74,10 +76,10 @@ class SmartNavbar {
     $this->log(sprintf("POST params = %s\n RESULTS: %s",print_r($what,1),$results));
     if ($results) {
       echo 'OK';
-      wp_die(); // this is required to terminate immediately and return a proper response    
+      wp_die(); // this is required to terminate immediately and return a proper response
     } else {
       echo 'Unable to save';
-      wp_die('Error','Unable to save change',400); 
+      wp_die('Error','Unable to save change',400);
     }
   }
   public function update_options($form) {
@@ -98,9 +100,9 @@ class SmartNavbar {
   public function configuration_screen() {
     if (is_user_logged_in() && is_admin() ){
       $page_link = get_permalink($this->options[post_id]);
-      
+
       $message = $this->update_options($_POST);
-      $opts = $this->options[options];
+      $opts = $this->get_merged_options();
       $this->log(sprintf("OPTIONS: %s",print_r($opts,1)));
       if ($message) {
         printf('<div id="message" class="updated fade"><p>%s</p></div>',$message);
@@ -140,16 +142,16 @@ class SmartNavbar {
           <!-- Right Side -->
   				<div class="inner-sidebar">
   					<div id="side-sortables" class="meta-box-sortabless ui-sortable" style="position:relative;">
-<?php 
+<?php
                 $this->html_box_header('snb_about',__('About this Plugin',$this->i18n),true);
                 // side bar elems
-                $this->sidebar_link('PayPal',$this->donate_link,'Donate with PayPal'); 
-                $this->sidebar_link('Home','https://wordpress.org/plugins//','Plugin Homepage'); 
-                $this->sidebar_link('Suggestion','https://wordpress.org/support/plugin/','Suggestions'); 
-                $this->sidebar_link('Contact','mailto:wordpress@loudlever.com','Contact Us'); 
-                $this->sidebar_link('More','https://wordpress.org/plugins/tags/loudlever','More Plugins by Us'); 
-            	  $this->html_box_footer(true); 
-?>  
+                $this->sidebar_link('PayPal',$this->donate_link,'Donate with PayPal');
+                $this->sidebar_link('Home','https://wordpress.org/plugins//','Plugin Homepage');
+                $this->sidebar_link('Suggestion','https://wordpress.org/support/plugin/','Suggestions');
+                $this->sidebar_link('Contact','mailto:wordpress@loudlever.com','Contact Us');
+                $this->sidebar_link('More','https://wordpress.org/plugins/tags/loudlever','More Plugins by Us');
+            	  $this->html_box_footer(true);
+?>
             </div>
           </div>
           <!-- Left Side -->
@@ -158,15 +160,16 @@ class SmartNavbar {
   						<div class="meta-box-sortabless">
                 <!-- Default Settings -->
                 <?php $this->html_box_header('snb_default_asins',__('Overview',$this->i18n),true); ?>
-  						  <p>Readers will be able to view their Bookmarks and Favorites on the page: <a href='<?php echo $page_link; ?>'><?php echo $this->page_title; ?></a></p>
+                <?php # printf("<pre>OPts: %s</pre>",print_r($opts,1)); ?>
+                <p>Readers will be able to view their Bookmarks and Favorites on the page: <a href='<?php echo $page_link; ?>'><?php echo $this->page_title; ?></a></p>
   						  <p>Feel free the <?php echo edit_post_link('modify the page','','',$this->options[post_id]); ?> if you wish.  Just remember to keep the following shortcode in the page:</p>
   						  <p><code>[<?php echo $this->page_shortcode; ?>]</code>.</p>
-  						  <?php $this->html_box_footer(true); ?>  
-  						  
+  						  <?php $this->html_box_footer(true); ?>
+
                 <form method="post" action="admin.php?page=<?php echo SNB_ADMIN_PAGE; ?>">
                   <?php
                     if(function_exists('wp_nonce_field')){ wp_nonce_field(SNB_ADMIN_PAGE_NONCE); }
-                  ?>   
+                  ?>
                   <?php $this->html_box_header('snb_default_asins',__('Settings',$this->i18n),true); ?>
                   <p>By default, the nav bar will only display on POSTs.  Check below where you would also like it to display.</p>
                   <p>
@@ -180,7 +183,20 @@ class SmartNavbar {
                     <label class='snb_label' for='snb_on_home'>Display on Home?</label>
                     <input type="hidden" name="save_settings" value="1" />
                   </p>
-                  <?php $this->html_box_footer(true); ?>  
+                  <!-- Show Author? -->
+                  <p>
+                    <input type='hidden' name="snb_opt[show_author]" value='0'/>
+                    <input type="checkbox" name="snb_opt[show_author]" id="snb_show_author" class='amznpp_input' value="1" <?php if ($opts[show_author] == 1) { echo 'checked'; } ?> />
+                    <label class='snb_label' for='snb_show_author'>Display the Author Name?</label>
+                  </p>
+                  <!-- Show Category ? -->
+                  <p>
+                    <input type='hidden' name="snb_opt[show_category]" value='0'/>
+                    <input type="checkbox" name="snb_opt[show_category]" id="snb_show_category" class='amznpp_input' value="1" <?php if ($opts[show_category] == 1) { echo 'checked'; } ?> />
+                    <label class='snb_label' for='snb_show_category'>Display the Category?</label>
+                  </p>
+
+                  <?php $this->html_box_footer(true); ?>
                   <input type="submit" class="button-primary" name="save_button" value="<?php _e('Update Settings', $this->i18n); ?>" />
     	          </form>
               </div>
@@ -196,7 +212,7 @@ class SmartNavbar {
   public function configuration_screen_help($contextual_help, $screen_id, $screen) {
     if ($screen_id == $this->help) {
       $contextual_help = <<<EOF
-<h2>Overview</h2>      
+<h2>Overview</h2>
 <p>Not much to see here :)  Carry on!</p>
 EOF;
     }
@@ -206,11 +222,15 @@ EOF;
     global $wp_the_query,$post;
     $opts = $this->options[options];
     // $this->log(sprintf("showing header bar\n home ops: %s\nis home %s\n front page %s", $opts[on_home], is_home(),is_front_page()));
-    // will never show here
-    if (is_admin() || is_feed() || is_robots() || is_trackback()) { return; }
-    // Don't show here if toggled off
-    if (is_home() && !$opts[on_home]) { return; }
-    if (is_page() && !$opts[on_page]) { return; }
+    $display = false;
+    if (is_single()) {
+      $display = true;
+    } elseif (is_home() && $opts[on_home]) {
+      $display = true;
+    } elseif (is_page() && $opts[on_page]) {
+      $display = true;
+    }
+    if (!$display) { return; }
     if (  $wp_query === $wp_the_query )  {
       $this->log(sprintf("post => %s",print_r($post,1)));
       $author = get_the_author_meta('display_name',$post->post_author);
@@ -224,25 +244,39 @@ EOF;
       $this->log(sprintf("ROW DATA: %s",print_r($data,1)));
       $heart = $data->heart > 0 ? 'fa-heart' : 'fa-heart-o';
       $bookmark = $data->bookmark > 0 ? 'fa-bookmark' : 'fa-bookmark-o';
-      
+
+      $author = '';
+      $cats = '';
+      if ($opts[show_author]) {
+        $author =<<<EOF
+        <span class='author'>{$author_link}</span>
+EOF;
+      }
+      if ($opts[show_category] && is_single()) {
+        $cats =<<<EOF
+        <span class='categories'>{$category}</span>
+EOF;
+      }
+
+
       // TODO: Get navigation into bar
+
       $text = <<<EOF
         <div id="smart-navbar" {$is_admin}>
           <div id="smart-navbar-left">
-            <!--<i id='snb-arrow-circle' class='fa fa-arrow-circle-left fa-lg' title='Previous'></i>-->
             <a href="{$this->page_permalink}"><i id='snb-bars' class='fa fa-bars fa-lg' title='Settings'></i></a>
             <i id='snb-heart' class='fa {$heart} fa-lg' title='Add to Favorites' data-id='{$post->ID}'></i>
             <i id='snb-bookmark' class='fa {$bookmark} fa-lg' title='Add to Bookmarks' data-id='{$post->ID}'></i>
             <!--<i id='snb-share-square' class='fa fa-share-square-o fa-lg' title='Share with Friends'></i>-->
           </div>
-          
-          <div id="smart-navbar-right">
-            <!--<i class='fa fa-arrow-circle-right fa-lg' title='Next'></i>-->
-          </div>
           <div id="smart-navbar-center">
-            <h3 class='entry-title'>{$post->post_title}</h3>
-            <div class='author'>by {$author_link}</div>
-            <div class='categories-links'>posted in {$category}</div>
+          <!--<i id='snb-arrow-circle' class='fa fa-arrow-circle-left fa-lg' title='Previous'></i>-->
+            <h3>
+              <span class='title'>{$post->post_title}</span>
+              {$author}
+              {$cats}
+            </h3>
+            <!--<i class='fa fa-arrow-circle-right fa-lg' title='Next'></i>-->
           </div>
         </div>
 EOF;
@@ -290,13 +324,13 @@ EOF;
 	      $html .= sprintf("<li><a href='%s'>%s</a></li>",get_permalink($obj->post_ID),$title);
         }
       $html .= '</ul>';
-    } else { 
-      $html .= "<p>No {$title} yet.</p>";  
+    } else {
+      $html .= "<p>No {$title} yet.</p>";
     }
     return $html;
   }
   public function plugin_filter() {
-    return sprintf('plugin_action_links_%s',SNB_PLUGIN_FILE); 
+    return sprintf('plugin_action_links_%s',SNB_PLUGIN_FILE);
   }
   public function plugin_link($links) {
     $url = $this->settings_url();
@@ -323,11 +357,11 @@ EOF;
     add_action("admin_print_scripts-". $this->help, array(&$this,'admin_js'));
     add_action("admin_print_styles-". $this->help, array(&$this,'admin_stylesheet') );
   }
-  
+
   public function sidebar_link($key,$link,$text) {
     printf('<a class="snb_button snb_%s" href="%s" target="_blank">%s</a>',$key,$link,__($text,$this->i18n));
   }
-  
+
   public function write_cookies() {
     $cookie = $this->read_cookies();
     // $this->log("existing cookie in write_cookies : $cookie");
@@ -343,7 +377,7 @@ EOF;
   private function delete_db() {
     global $wpdb;
     $table = $this->get_user_table_name();
-    $wpdb->query( "DROP TABLE IF EXISTS {$table}" ); 
+    $wpdb->query( "DROP TABLE IF EXISTS {$table}" );
     return;
   }
   private function get_user_setting($actor) {
@@ -363,7 +397,7 @@ EOF;
     if ($actor) {
       $table = $this->get_user_table_name();
       $sql = $wpdb->prepare("
-        SELECT u.post_ID, u.bookmark,u.heart,p.post_title  
+        SELECT u.post_ID, u.bookmark,u.heart,p.post_title
         FROM $table u
         INNER JOIN $wpdb->posts p
         ON u.post_ID = p.ID
@@ -377,7 +411,6 @@ EOF;
     return null;
   }
 
-  
   private function get_user_table_name() {
     global $wpdb;
     if (!$this->db_table_name) {
@@ -385,6 +418,7 @@ EOF;
     }
     return $this->db_table_name;
   }
+
   private function init_install_options() {
     $this->options = array(
       'plugin' => array(
@@ -405,7 +439,7 @@ EOF;
     $this->init_install_options();
     $this->init_db();
     $post_id = $this->create_bookmarks_page();
-    
+
     $this->options[plugin][version_last] = SNB_PLUGIN_VERSION;
     $this->options[plugin][version_current] = SNB_PLUGIN_VERSION;
     $this->options[plugin][install_date] = Date('Y-m-d');
@@ -464,7 +498,7 @@ EOF;
   }
 
   // Update the user's action in the database.
-  // http://codex.wordpress.org/Class_Reference/wpdb 
+  // http://codex.wordpress.org/Class_Reference/wpdb
   private function update_user_setting($data) {
     global $wpdb;
     // $data should have 3 vals, like : actor:_snb54f64574f28af2.62829307, item:bookmark, state:off
@@ -475,7 +509,7 @@ EOF;
       $sql = $wpdb->prepare("SELECT id FROM $table WHERE user = %s AND post_ID = %d",$data['actor'],$data['post_ID']);
       $id = $wpdb->get_var($sql);
       if (!$id) {
-        $wpdb->insert( 
+        $wpdb->insert(
           $table,
           array('user'=>$data['actor'],'post_ID'=>$data['post_ID'],$data['item']=>$bool,'created_at'=>$time,'updated_at'=>$time),
           array( '%s', '%d', '%d', '%s', '%s' )
@@ -496,7 +530,7 @@ EOF;
   }
   public function admin_js() {
     // $this->log("in the admin_js()");
-    // wp_enqueue_script('sgw', WP_PLUGIN_URL . '/support-great-writers/js/sgw.js'); 
+    // wp_enqueue_script('sgw', WP_PLUGIN_URL . '/support-great-writers/js/sgw.js');
   }
   public function admin_stylesheet() {
     $this->log("in the admin_stylesheet()");
@@ -526,11 +560,22 @@ EOF;
     }
     return;
   }
+  private function get_defaults() {
+    $d = array(
+      'on_page' => true,
+      'on_home' => false,
+      'show_author' => true,
+      'show_category' => true
+    );
+    return $d;
+  }
+  private function get_merged_options() {
+    $opts = array_merge($this->get_defaults(), $this->options[options]);
+    return $opts;
+  }
   private function get_version_as_int($str) {
     $var = intval(preg_replace("/[^0-9 ]/", '', $str));
     return $var;
   }
-
-
 }
 ?>

@@ -1,10 +1,10 @@
 === Smart-Navbar ===
-Contributors: loudlever
+Contributors: loudlever, heypublisher
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=Y8SL68GN5J2PL
-Tags: navigation, bookmark, favorite, loudlever
-Requires at least: 3.5
-Tested up to: 4.2.2
-Stable tag: 0.1.0
+Tags: navigation, bookmark, favorite, loudlever, heypublisher
+Requires at least: 4.0
+Tested up to: 4.7.3
+Stable tag: 0.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,12 +28,36 @@ This plugin give you a simple way to allow your readers to bookmark or favorite 
 2. Upload the 'smart-navbar' directory to your '/wp-content/plugins/' directory, using your favorite method (ftp, sftp, scp, etc...)
 3. Activate Smart-Navbar from your Plugins page.
 
+**Styling the Plugin**
+
+The text displayed in the Smart-Navbar is contained within the element
+`#smart-navbar #smart-navbar-center H3`
+
+You can change the text that displays before the author's name by adding something similar to your theme's style.css:
+`
+#smart-navbar #smart-navbar-center H3 .author:before {
+  content: '~ by ';
+}
+`
+You can change the text that displays before the author's name by adding something similar to your theme's style.css:
+`
+#smart-navbar #smart-navbar-center H3 .categories:before {
+  content: ' posted in ';
+}
+`
+
 == Screenshots ==
 
 1. Simple bar automatically displays at the top of page on all POSTs as readers scroll down the page.  When displayed, readers can favorite or bookmark the POSTs by simply clicking on the icon.
 2. The page readers will see when they click on settings icon, allowing them to see all of the POSTs they have favorited or bookmarked.
 
 == Changelog ==
+
+= 0.2.0 =
+* Added ability to toggle on/off display of author name and category in the nav bar.
+* Added logic so nav bar does not display on archive pages (it now only displays on Posts and, if enabled, on Pages and Home page.)
+* Moved the additional text that's displayed (like the "by" for the author and "posted in" for the categories) to a style that you can control.  See the "Styling" section.
+* Cleaned up some more of the code.
 
 = 0.1.0 =
 * Added ability to display smart-navbar on Pages and Home page.
